@@ -37,9 +37,10 @@ class NewVisitortest(unittest.TestCase):
         # koju je upravo napisao "Termin 10.01.! Hajmo prijave! :)"
         inputbox.send_keys(Keys.ENTER)
         comments_list = self.browser.find_element_by_id('id_ul_comments')
-        comments = comments_list.find_elements_by_tag('li')
+        comments = comments_list.find_elements_by_tag_name('li')
         self.assertTrue(
-            any(comment.text == 'Termin 10.01.! Hajmo prijave! :)' for comment in comments)
+            any(comment.text == 'Termin 10.01.! Hajmo prijave! :)' for comment in comments),
+            'New commment did not appear in comments list'
         )        
 
         # Tu se i dalje nalazi text box koji poziva da napise odgovor na pozivnicu
