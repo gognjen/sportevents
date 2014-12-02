@@ -36,25 +36,31 @@ class NewVisitortest(unittest.TestCase):
         # Kada pritisne enter, stranica se azurira i prikazuje se pozivnica
         # koju je upravo napisao "Termin 10.01.! Hajmo prijave! :)"
         inputbox.send_keys(Keys.ENTER)
+        
         comments_list = self.browser.find_element_by_id('id_ul_comments')
         comments = comments_list.find_elements_by_tag_name('li')
-        self.assertTrue(
-            any(comment.text == 'Termin 10.01.! Hajmo prijave! :)' for comment in comments),
-            'New commment did not appear in comments list'
-        )        
+        
+        self.assertIn('Termin 10.01.! Hajmo prijave! :)' , [comment.text for comment in comments])        
 
         # Tu se i dalje nalazi text box koji poziva da napise odgovor na pozivnicu
         # ili dodatni komentar. On upisuje "Zarko" da bi drugi znali da je on 
         # napisao pozivnicu.
-        self.fail('Finish test')
+        inputbox = self.browser.find_element_by_id('id_new_message')        
+        inputbox.send_keys('Zarko')
+        inputbox.send_keys(Keys.ENTER)                 
 
         # Stranica se ponovo osvježava i sada se ispod postojeće poruke vidi drugi
         # komentar.
+        comments_list = self.browser.find_element_by_id('id_ul_comments')
+        comments = comments_list.find_elements_by_tag_name('li')
+        self.assertIn('Termin 10.01.! Hajmo prijave! :)' , [comment.text for comment in comments])        
+        self.assertIn('Zarko' , [comment.text for comment in comments])        
 
         # Zarko se pita da li ce aplikacija zapamtiti njegovu pozivnicu i da li ce
         # je moci poslati prijateljima na Facebook ili na mail. Tada primjecuje da
         # je aplikacija generisala jedinstveni URL za njegovu pozivnicu.
-
+        self.fail('Finish test')
+        
         # Posjecuje taj URL i primjecuje da su njegova pozivnica i komentar jos 
         # uvijek tamo.
 
