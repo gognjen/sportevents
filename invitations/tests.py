@@ -28,7 +28,12 @@ class HomePageTest(TestCase):
         
         response = home_page(request)
         
-        self.assertIn('A new comment', response.content.decode())
+        self.assertEqual(Message.objects.count(), 1)
+        new_message = Message.objects.first()
+        self.assertEqual(new_message.text, 'A new comment')
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], '/')        
 
     def test_saving_and_retreiving_messages(self):
         first_message = Message()
@@ -48,9 +53,21 @@ class HomePageTest(TestCase):
         self.assertEqual(first_saved_message.text, 'The first (ever) message')
         self.assertEqual(second_saved_message.text, 'Message the second')
     
-    
-    
-    
+    def test_home_page_only_saves_items_when_necessary(self):
+        request = HttpRequest()
+        home_page(request)
+        self.assertEqual(Message.objects.count(), 0)    
+
+    def test_home_page_display_all_messages(self):
+        Message.objects.create(text='Message 1')
+        Message.objects.create(text='Message 2')
+        
+        request = HttpRequest()
+        response = home_page(request)
+        
+        self.assertIn('Message 1', response.content.decode())
+        self.assertIn('Message 2', response.content.decode())    
+        
     
     
     

@@ -3,7 +3,9 @@
     <body>
         <h1>Organizujte svoje sportske aktivnosti</h1>        
         <ul id="id_ul_comments">
-            <li>{{ new_message }}</li>
+            {% for message in messages %}
+                <li>{{ message.text }}</li>
+            {% endfor %}                
         </ul>
         <form method="POST">
             {% csrf_token %}
