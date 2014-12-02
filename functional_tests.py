@@ -11,6 +11,11 @@ class NewVisitortest(unittest.TestCase):
     def tearDown(self):
         self.browser.quit()
         
+    def check_message_in_comments(self, message):
+        comments_list = self.browser.find_element_by_id('id_ul_comments')
+        comments = comments_list.find_elements_by_tag_name('li')
+        self.assertIn(message, [comment.text for comment in comments])                        
+        
     def test_can_write_an_invitation_and_retrieve_it_later(self):                
         # Zarko je cuo za novu web aplikaciju koja mu moze pomoci da organizuje 
         # svoje sportske aktivnosti. Otvara pocetnu stranicu da vidi o cemu se 
@@ -37,10 +42,7 @@ class NewVisitortest(unittest.TestCase):
         # koju je upravo napisao "Termin 10.01.! Hajmo prijave! :)"
         inputbox.send_keys(Keys.ENTER)
         
-        comments_list = self.browser.find_element_by_id('id_ul_comments')
-        comments = comments_list.find_elements_by_tag_name('li')
-        
-        self.assertIn('Termin 10.01.! Hajmo prijave! :)' , [comment.text for comment in comments])        
+        self.check_message_in_comments('Termin 10.01.! Hajmo prijave! :)')
 
         # Tu se i dalje nalazi text box koji poziva da napise odgovor na pozivnicu
         # ili dodatni komentar. On upisuje "Zarko" da bi drugi znali da je on 
@@ -51,10 +53,8 @@ class NewVisitortest(unittest.TestCase):
 
         # Stranica se ponovo osvježava i sada se ispod postojeće poruke vidi drugi
         # komentar.
-        comments_list = self.browser.find_element_by_id('id_ul_comments')
-        comments = comments_list.find_elements_by_tag_name('li')
-        self.assertIn('Termin 10.01.! Hajmo prijave! :)' , [comment.text for comment in comments])        
-        self.assertIn('Zarko' , [comment.text for comment in comments])        
+        self.check_message_in_comments('Termin 10.01.! Hajmo prijave! :)')
+        self.check_message_in_comments('Zarko')                
 
         # Zarko se pita da li ce aplikacija zapamtiti njegovu pozivnicu i da li ce
         # je moci poslati prijateljima na Facebook ili na mail. Tada primjecuje da
