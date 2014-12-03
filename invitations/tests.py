@@ -40,7 +40,7 @@ class HomePageTest(TestCase):
         response = home_page(request)
             
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/')        
+        self.assertEqual(response['location'], '/invitations/test-sample/')        
 
     def test_saving_and_retreiving_messages(self):
         first_message = Message()
@@ -64,19 +64,24 @@ class HomePageTest(TestCase):
         request = HttpRequest()
         home_page(request)
         self.assertEqual(Message.objects.count(), 0)    
+        
+    
+class ListViewTest(TestCase):
 
-    def test_home_page_display_all_messages(self):
-        Message.objects.create(text='Message 1')
-        Message.objects.create(text='Message 2')
-        
-        request = HttpRequest()
-        response = home_page(request)
-        
-        self.assertIn('Message 1', response.content.decode())
-        self.assertIn('Message 2', response.content.decode())    
+    def test_uses_invitation_template(self):
+        response = self.client.get('/invitations/test-sample/')
+        self.assertTemplateUsed(response, 'invitation.html')
         
     
-    
+    def test_display_all_messages(self):
+        Message.objects.create(text='message 1')
+        Message.objects.create(text='message 2')
+        
+        response = self.client.get('/invitations/test-sample/')
+        
+        self.assertContains(response, 'message 1')
+        self.assertContains(response, 'message 2')
+        
     
     
     

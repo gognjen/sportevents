@@ -1,0 +1,15 @@
+<html>
+    <title>Organizujte svoje sportske aktivnosti</title>
+    <body>
+        <h1>Organizujte svoje sportske aktivnosti</h1>        
+        <ul id="id_ul_comments">
+            {% for message in messages %}
+                <li>{{ message.text }}</li>
+            {% endfor %}                
+        </ul>
+        <form method="POST" action="/">
+            {% csrf_token %}
+            <input name="message" id="id_new_message" placeholder="Enter an invitation message" />
+        </form>
+    </body>    
+</html>
