@@ -41,7 +41,8 @@ class NewVisitortest(LiveServerTestCase):
         # Kada pritisne enter, stranica se azurira i prikazuje se pozivnica
         # koju je upravo napisao "Termin 10.01.! Hajmo prijave! :)"
         inputbox.send_keys(Keys.ENTER)
-        
+        zarko_invitation_url = self.browser.current_url
+        self.assertRegex(zarko_invitation_url, '/invitations/.+')
         self.check_message_in_comments('Termin 10.01.! Hajmo prijave! :)')
 
         # Tu se i dalje nalazi text box koji poziva da napise odgovor na pozivnicu
@@ -56,15 +57,37 @@ class NewVisitortest(LiveServerTestCase):
         self.check_message_in_comments('Termin 10.01.! Hajmo prijave! :)')
         self.check_message_in_comments('Zarko')                
 
-        # Zarko se pita da li ce aplikacija zapamtiti njegovu pozivnicu i da li ce
-        # je moci poslati prijateljima na Facebook ili na mail. Tada primjecuje da
-        # je aplikacija generisala jedinstveni URL za njegovu pozivnicu.
-        self.fail('Finish test')
+        # Sada novi korisnik, Ognjen, dolazi na stranicu
         
-        # Posjecuje taj URL i primjecuje da su njegova pozivnica i komentar jos 
-        # uvijek tamo.
+        ## Koristimo novu sesiju da bi bili sigurni  da ne 
+        ## postoje nikakve informacije o Zarkovoj sesiji
+        ## (cookies i tome slicno)
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+        
+        # Ognjen posjecuje pocetnu stranicu. Nema traga Zarkovoj pozivnici
+        
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Termin 10.01.! Hajmo prijave! :)', page_text)
+        self.assertNotIn('Zarko', page_text)
+        
+        # Ognjen pocinje pisati novu pozivnicu
+        inputbox = self.browser.find_element_by_id('id_new_message')
+        inputbox.send_keys('Hoce li neko fudbala u nedjelju?')
+        inputbox.send_keys(Keys.ENTER)
+        
+        # Ognjen dobiva svoj vlastiti jedinstveni URL
+        ognjen_invitation_url = self.browser.current_url
+        self.assertRegex(ognjen_invitation_url, '/invitations/.+')
+        self.assertNotEqual(ognjen_invitation_url, zarko_invitation_url)
+        
+        # Ponovo, nema traga Zarkovim porukama
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Termin 10.01.! Hajmo prijave! :)', page_text)
+        self.assertIn('Hoce li neko fudbala u nedjelju?', page_text)
 
-        # Zadovoljan, odlazi na spavanje.
+        # Zadovoljni, obojica odlaze na spavanje.
 
 if __name__ == '__main__':
     unittest.main(warnings='ignore')

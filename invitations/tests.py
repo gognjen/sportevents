@@ -32,6 +32,13 @@ class HomePageTest(TestCase):
         new_message = Message.objects.first()
         self.assertEqual(new_message.text, 'A new comment')
         
+    def test_home_page_redirects_after_POST(self):        
+        request = HttpRequest()
+        request.method = 'POST'
+        request.POST['message'] = 'A new comment' 
+
+        response = home_page(request)
+            
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['location'], '/')        
 
