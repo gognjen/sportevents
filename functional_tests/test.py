@@ -1,8 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-import unittest
+from django.test import LiveServerTestCase
 
-class NewVisitortest(unittest.TestCase):
+class NewVisitortest(LiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Firefox()
@@ -20,7 +20,7 @@ class NewVisitortest(unittest.TestCase):
         # Zarko je cuo za novu web aplikaciju koja mu moze pomoci da organizuje 
         # svoje sportske aktivnosti. Otvara pocetnu stranicu da vidi o cemu se 
         # tu radi.
-        self.browser.get('http://localhost:8000/')
+        self.browser.get(self.live_server_url)
 
         # Primjecuje da naslov stranice i zaglavlje spominju
         # sportskih aktivnosti.
