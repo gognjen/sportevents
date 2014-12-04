@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Message
+from .models import Message, Invitation
 
 # Create your views here.
 def home_page(request):             
@@ -12,5 +12,6 @@ def view_invitation(request):
     return render(request, 'invitation.html', {'messages': messages})
     
 def new_invitation(request):
-    Message.objects.create(text=request.POST['message'])
+    invitation = Invitation.objects.create()
+    Message.objects.create(text=request.POST['message'], invitation=invitation)
     return redirect('/invitations/test-sample/')   

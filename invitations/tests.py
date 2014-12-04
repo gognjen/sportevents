@@ -3,7 +3,7 @@ from django.http import HttpRequest
 from django.test import TestCase
 from invitations.views import home_page
 from django.template.loader import render_to_string
-from invitations.models import Message
+from invitations.models import Message, Invitation
 
 # Create your tests here.
 class HomePageTest(TestCase):
@@ -22,14 +22,24 @@ class HomePageTest(TestCase):
         self.assertEqual(response.content.decode(), expected_html)
         
 
+class InvitationAndMessageModelTest(TestCase):
+
     def test_saving_and_retreiving_messages(self):
+        invitation = Invitation()
+        invitation.save()
+    
         first_message = Message()
         first_message.text = 'The first (ever) message'
+        first_message.invitation = invitation
         first_message.save()
         
         second_message = Message()
         second_message.text = 'Message the second'
+        second_message.invitation = invitation
         second_message.save()
+        
+        saved_invitation = Invitation.objects.first()
+        self.assertEqual(saved_invitation, invitation)
         
         saved_messages = Message.objects.all()
         self.assertEqual(saved_messages.count(), 2)
@@ -38,10 +48,12 @@ class HomePageTest(TestCase):
         second_saved_message = saved_messages[1]
         
         self.assertEqual(first_saved_message.text, 'The first (ever) message')
+        self.assertEqual(first_saved_message.invitation, invitation)
         self.assertEqual(second_saved_message.text, 'Message the second')   
+        self.assertEqual(second_saved_message.invitation, invitation)
         
     
-class ListViewTest(TestCase):
+class InvitationViewTest(TestCase):
 
     def test_uses_invitation_template(self):
         response = self.client.get('/invitations/test-sample/')
@@ -49,8 +61,9 @@ class ListViewTest(TestCase):
         
     
     def test_display_all_messages(self):
-        Message.objects.create(text='message 1')
-        Message.objects.create(text='message 2')
+        invitation = Invitation.objects.create()
+        Message.objects.create(text='message 1', invitation=invitation)
+        Message.objects.create(text='message 2', invitation=invitation)
         
         response = self.client.get('/invitations/test-sample/')
         

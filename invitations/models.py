@@ -1,5 +1,9 @@
 from django.db import models
 
-# Create your models here.
+
+class Invitation(models.Model):
+    pass    
+
 class Message(models.Model):
     text = models.TextField(default='')
+    invitation = models.ForeignKey(Invitation, default=None)
