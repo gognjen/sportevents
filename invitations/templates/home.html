@@ -2,7 +2,7 @@
     <title>Organizujte svoje sportske aktivnosti</title>
     <body>
         <h1>Organizujte svoje sportske aktivnosti</h1>               
-        <form method="POST">
+        <form method="POST" action="/invitations/new">
             {% csrf_token %}
             <input name="message" id="id_new_message" placeholder="Enter an invitation message" />
         </form>

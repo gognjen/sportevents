@@ -21,26 +21,6 @@ class HomePageTest(TestCase):
         )
         self.assertEqual(response.content.decode(), expected_html)
         
-    def test_home_page_can_save_a_POST_request(self):
-        request = HttpRequest()
-        request.method = 'POST'
-        request.POST['message'] = 'A new comment' 
-        
-        response = home_page(request)
-        
-        self.assertEqual(Message.objects.count(), 1)
-        new_message = Message.objects.first()
-        self.assertEqual(new_message.text, 'A new comment')
-        
-    def test_home_page_redirects_after_POST(self):        
-        request = HttpRequest()
-        request.method = 'POST'
-        request.POST['message'] = 'A new comment' 
-
-        response = home_page(request)
-            
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/invitations/test-sample/')        
 
     def test_saving_and_retreiving_messages(self):
         first_message = Message()
@@ -58,12 +38,7 @@ class HomePageTest(TestCase):
         second_saved_message = saved_messages[1]
         
         self.assertEqual(first_saved_message.text, 'The first (ever) message')
-        self.assertEqual(second_saved_message.text, 'Message the second')
-    
-    def test_home_page_only_saves_items_when_necessary(self):
-        request = HttpRequest()
-        home_page(request)
-        self.assertEqual(Message.objects.count(), 0)    
+        self.assertEqual(second_saved_message.text, 'Message the second')   
         
     
 class ListViewTest(TestCase):
@@ -81,6 +56,25 @@ class ListViewTest(TestCase):
         
         self.assertContains(response, 'message 1')
         self.assertContains(response, 'message 2')
+        
+        
+    def test_saveing_a_POST_request(self):
+        self.client.post(
+            '/invitations/new',
+            data={'message': 'A new comment'}
+        )
+        
+        self.assertEqual(Message.objects.count(), 1)
+        new_message = Message.objects.first()
+        self.assertEqual(new_message.text, 'A new comment')
+        
+    def test_redirects_after_POST(self):        
+        response = self.client.post(
+            '/invitations/new',
+            data={'message': 'A new comment'}
+        )           
+        
+        self.assertRedirects(response, '/invitations/test-sample/')                
         
     
     
