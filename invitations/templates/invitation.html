@@ -3,11 +3,11 @@
     <body>
         <h1>Organizujte svoje sportske aktivnosti</h1>        
         <ul id="id_ul_comments">
-            {% for message in messages %}
+            {% for message in invitation.message_set.all %}
                 <li>{{ message.text }}</li>
             {% endfor %}                
         </ul>
-        <form method="POST" action="/invitations/new">
+        <form method="POST" action="/invitations/{{ invitation.id }}/add_message">
             {% csrf_token %}
             <input name="message" id="id_new_message" placeholder="Enter an invitation message" />
         </form>

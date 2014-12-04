@@ -7,11 +7,18 @@ def home_page(request):
     return render(request, 'home.html')
     
 
-def view_invitation(request):
-    messages = Message.objects.all()        
-    return render(request, 'invitation.html', {'messages': messages})
+def view_invitation(request, invitation_id):
+    invitation = Invitation.objects.get(id=invitation_id)    
+    return render(request, 'invitation.html', {'invitation': invitation})
     
+
 def new_invitation(request):
     invitation = Invitation.objects.create()
     Message.objects.create(text=request.POST['message'], invitation=invitation)
-    return redirect('/invitations/test-sample/')   
+    return redirect('/invitations/%d/' % (invitation.id,))
+
+
+def add_message(request, invitation_id):
+    invitation = Invitation.objects.get(id=invitation_id)
+    Message.objects.create(text=request.POST['message'], invitation=invitation)
+    return redirect('/invitations/%d/' % (invitation.id))

@@ -56,22 +56,28 @@ class InvitationAndMessageModelTest(TestCase):
 class InvitationViewTest(TestCase):
 
     def test_uses_invitation_template(self):
-        response = self.client.get('/invitations/test-sample/')
+        invitation = Invitation.objects.create()
+        response = self.client.get('/invitations/%d/' % (invitation.id,))
         self.assertTemplateUsed(response, 'invitation.html')
         
     
-    def test_display_all_messages(self):
-        invitation = Invitation.objects.create()
-        Message.objects.create(text='message 1', invitation=invitation)
-        Message.objects.create(text='message 2', invitation=invitation)
+    def test_display_only_messages_for_that_invitation(self):
+        correct_invitation = Invitation.objects.create()
+        Message.objects.create(text='message 1', invitation=correct_invitation)
+        Message.objects.create(text='message 2', invitation=correct_invitation)        
+        other_invitation = Invitation.objects.create()
+        Message.objects.create(text='other message 1', invitation=other_invitation)
+        Message.objects.create(text='other message 2', invitation=other_invitation)        
         
-        response = self.client.get('/invitations/test-sample/')
+        response = self.client.get('/invitations/%d/' % (correct_invitation.id,))
         
         self.assertContains(response, 'message 1')
         self.assertContains(response, 'message 2')
+        self.assertNotContains(response, 'other message 1')
+        self.assertNotContains(response, 'other message 2')        
         
         
-    def test_saveing_a_POST_request(self):
+    def test_saving_a_POST_request(self):
         self.client.post(
             '/invitations/new',
             data={'message': 'A new comment'}
@@ -85,12 +91,46 @@ class InvitationViewTest(TestCase):
         response = self.client.post(
             '/invitations/new',
             data={'message': 'A new comment'}
-        )           
-        
-        self.assertRedirects(response, '/invitations/test-sample/')                
-        
+        )                  
+        invitation = Invitation.objects.first()        
+        self.assertRedirects(response, '/invitations/%d/' % (invitation.id,))                
+            
+    def test_passes_correct_invitation_to_template(self):
+        other_invitation = Invitation.objects.create()
+        correct_invitation = Invitation.objects.create()
+        response = self.client.get('/invitations/%d/' % (correct_invitation.id,))
+        self.assertEqual(response.context['invitation'], correct_invitation)
+
+class NewMessageTest(TestCase):
     
-    
+    def test_can_save_a_POST_request_to_an_existing_invitation(self):    
+        other_invitation = Invitation.objects.create()
+        correct_invitation = Invitation.objects.create()
+        
+        self.client.post(
+            '/invitations/%d/add_message' % (correct_invitation.id,),
+            data={'message': 'A new message'}
+        )
+            
+        self.assertEqual(Message.objects.count(), 1)
+        new_message = Message.objects.first()
+        self.assertEqual(new_message.text, 'A new message')
+        self.assertEqual(new_message.invitation, correct_invitation)
+        
+    def test_redirects_to_invitation_view(self):
+        other_invitation = Invitation.objects.create()
+        correct_invitation = Invitation.objects.create()
+        
+        response = self.client.post(
+            '/invitations/%d/add_message' % (correct_invitation.id,),
+            data={'message': 'A new message'}
+        )
+        
+        self.assertRedirects(response, '/invitations/%d/' % (correct_invitation.id,))                    
+        
+        
+        
+     
     
     
     
