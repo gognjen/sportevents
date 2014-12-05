@@ -1,15 +1,32 @@
+import sys 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
-class NewVisitortest(LiveServerTestCase):
+
+class NewVisitortest(StaticLiveServerTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        for arg in sys.argv:
+            if 'liveserver' in arg:
+                cls.server_url = 'http://' + arg.split('=')[1]
+                return
+        super().setUpClass()
+        cls.server_url = cls.live_server_url
+              
+    @classmethod
+    def tearDownClass(cls):
+        if cls.server_url == cls.live_server_url:
+            super().tearDownClass()
+                                    
 
     def setUp(self):
         self.browser = webdriver.Firefox()
-        self.browser.implicitly_wait(3)
+        self.browser.implicitly_wait(3)        
 
     def tearDown(self):
-        self.browser.quit()
+        self.browser.quit()        
         
     def check_message_in_comments(self, message):
         comments_list = self.browser.find_element_by_id('id_ul_comments')
@@ -20,7 +37,7 @@ class NewVisitortest(LiveServerTestCase):
         # Zarko je cuo za novu web aplikaciju koja mu moze pomoci da organizuje 
         # svoje sportske aktivnosti. Otvara pocetnu stranicu da vidi o cemu se 
         # tu radi.
-        self.browser.get(self.live_server_url)
+        self.browser.get(self.server_url)
 
         # Primjecuje da naslov stranice i zaglavlje spominju
         # sportskih aktivnosti.
@@ -67,7 +84,7 @@ class NewVisitortest(LiveServerTestCase):
         
         # Ognjen posjecuje pocetnu stranicu. Nema traga Zarkovoj pozivnici
         
-        self.browser.get(self.live_server_url)
+        self.browser.get(self.server_url)
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Termin 10.01.! Hajmo prijave! :)', page_text)
         self.assertNotIn('Zarko', page_text)
